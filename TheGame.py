@@ -15,7 +15,7 @@ SCREEN_TITLE = "Santa's Workshop"
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 1
 TILE_SCALING = 0.5
-DEER_SCALING = 0.7              # STILL NEED TO APPLY THESE TO LATER IN THE CODE 
+DEER_SCALING = 0.5              # STILL NEED TO APPLY THESE TO LATER IN THE CODE 
 SIGN_SCALING = 0.5 
 
 # Movement speed of player, in pixels per frame
@@ -268,6 +268,8 @@ class MyGame(arcade.Window):
         for Wsign in wrong_sign_hit_list: 
             Wsign.remove_from_sprite_lists() # Remove sign 
             arcade.play_sound(self.WRONG_sound)
+            # Add one to the STRIKES 
+            self.strike += 1
         
         # ... --> CORRECT sign 
         for Csign in correct_sign_hit_list: 
