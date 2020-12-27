@@ -7,14 +7,61 @@ import arcade
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Some Coolio Game Title!"
+CENTER_X = 625
+CENTER_Y = 390
+RADIUS = 60
+LINETHICKNESS = 6
+start_x = 250
+start_y = 450 
+Menu_Title = "Santa's Workshop"
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 1
 TILE_SCALING = 0.5
 #COIN_SCALING = 0.5             # ALL OF THE COIN CONTENT HAS BEEN COMMENTED OUT 
 
+class MainMenuView(arcade.View):
+    def on_show(self):
+        self.hover = False
+        self.click = False
+        self.release = False
+        self.background = arcade.load_texture("Sprites/Main_Menu_Background.png")
+        self.startButton = arcade.Sprite("Sprites/Start_Button.png", scale = 0.25,center_x= CENTER_X,center_y =CENTER_Y)
 
-class MyGame(arcade.Window):
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,self.background)
+        self.startButton.draw()  
+        arcade.draw_text("Welcome to\nSanta's Workshop",start_x,start_y,arcade.color.WHITE,50, font_name='GARA',align= "center", anchor_x= "center", anchor_y="center", bold= True)
+        if self.hover == True:
+            arcade.draw_circle_outline(center_x=CENTER_X,center_y= CENTER_Y,radius= RADIUS,color= arcade.color.MINT_GREEN,border_width=LINETHICKNESS)
+        else:
+            pass
+    
+    def on_mouse_motion(self,x,y,dx,dy):
+        if (CENTER_X-RADIUS)<x<(CENTER_X+RADIUS) and (CENTER_Y-RADIUS)<y<(CENTER_Y+RADIUS):
+            self.hover = True
+        else:
+            self.hover = False
+    def on_mouse_press(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.click = True
+        else:
+            self.click = False
+    def on_mouse_release(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.release = True
+        else:
+            self.release = False
+        if self.hover and self.click and self.release:
+            game_view = MyGame()
+            game_view.setup()
+            self.window.show_view(game_view)
+        else:
+            pass
+
+
+class MyGame(arcade.View):
     """
     Main application class.
     """
@@ -22,7 +69,7 @@ class MyGame(arcade.Window):
     def __init__(self):
 
         # Call the parent class and set up the window
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # These are 'lists' that keep track of our sprites. Each sprite should
         # go into a list.
@@ -43,7 +90,7 @@ class MyGame(arcade.Window):
         #self.coin_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the player, specifically placing it at these coordinates.
-        image_source = "HolidayHacks2020/imagesGame/elf_stand.png"
+        image_source = "imagesGame/elf_stand.png"
         self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
         self.player_sprite.center_x = 55
         self.player_sprite.center_y = 105
@@ -52,7 +99,7 @@ class MyGame(arcade.Window):
         # Create the ground
         # This shows using a loop to place multiple sprites horizontally
         for x in range(0, 1250, 64):
-            wall = arcade.Sprite("HolidayHacks2020/imagesGame/grassMid.png", TILE_SCALING)
+            wall = arcade.Sprite("imagesGame/grassMid.png", TILE_SCALING)
             wall.center_x = x
             wall.center_y = 32
             self.wall_list.append(wall)
@@ -65,7 +112,7 @@ class MyGame(arcade.Window):
 
         for coordinate in coordinate_list:
             # Add a crate on the ground
-            wall = arcade.Sprite("HolidayHacks2020/imagesGame/signRight.png", TILE_SCALING)
+            wall = arcade.Sprite("imagesGame/signRight.png", TILE_SCALING)
             wall.position = coordinate
             self.wall_list.append(wall)
 
@@ -83,9 +130,11 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main method """
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH,SCREEN_HEIGHT, Menu_Title)
+    start_view = MainMenuView()
+    window.show_view(start_view)
     arcade.run()
+
 
 
 if __name__ == "__main__":
