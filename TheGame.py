@@ -11,20 +11,20 @@ import random
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Santa's Workshop"
-CENTER_X = 625
+CENTER_X = 625  # Menu 
 CENTER_Y = 390
-CENTER_X1 = CENTER_X -120 +322
-CENTER_Y1 = CENTER_Y -150
+CENTER_X1 = 505     # Game Over 
+CENTER_Y1 = 240
 RADIUS = 60
 LINETHICKNESS = 6
-start_x = 250
-start_y = 450 
+start_x = 140   # Start of Game Over 
+start_y = 450   # End 
 Menu_Title = "Santa's Workshop"
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 1
 TILE_SCALING = 0.5
-DEER_SCALING = 0.5              # STILL NEED TO APPLY THESE TO LATER IN THE CODE 
+DEER_SCALING = 0.5
 SIGN_SCALING = 0.5 
 
 # Movement speed of player, in pixels per frame
@@ -63,7 +63,7 @@ class MainMenuView(arcade.View):
         arcade.start_render()
         arcade.draw_lrwh_rectangle_textured(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,self.background)
         self.startButton.draw()  
-        arcade.draw_text("Welcome to\nSanta's Workshop",start_x,start_y,arcade.color.WHITE,50, font_name='GARA',align= "center", anchor_x= "center", anchor_y="center", bold= True)
+        arcade.draw_text("Welcome to\nSanta's Workshop",start_x+110,start_y,arcade.color.WHITE,50, font_name='GARA',align= "center", anchor_x= "center", anchor_y="center", bold= True)
         if self.hover == True:
             arcade.draw_circle_outline(center_x=CENTER_X,center_y= CENTER_Y,radius= RADIUS,color= arcade.color.MINT_GREEN,border_width=LINETHICKNESS)
         else:
@@ -97,21 +97,21 @@ class GameOverStrike(arcade.View):
         self.click = False
         self.release = False
         self.background = arcade.load_texture("imagesMenu/Will_Ferrel_Game_over.png")
-        self.startButton = arcade.Sprite("imagesMenu/Restart_Button.png", scale = 0.35,center_x= CENTER_X1,center_y =CENTER_Y1)
+        self.startButton = arcade.Sprite("imagesMenu/Restart_Button.png", scale = 0.35,center_x= SCREEN_WIDTH/2,center_y = SCREEN_HEIGHT/2)
 
     def on_draw(self):
         arcade.start_render()
-        arcade.draw_lrwh_rectangle_textured(322,0,SCREEN_WIDTH,SCREEN_HEIGHT,self.background)
+        arcade.draw_lrwh_rectangle_textured(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,self.background)
         self.startButton.draw()  
-        arcade.draw_text("GAME          OVER",start_x-110+322,start_y,arcade.color.RED_DEVIL,75, font_name='GARA')
-        arcade.draw_circle_outline(center_x=CENTER_X1,center_y= CENTER_Y1,radius= RADIUS*1.5,color= arcade.color.BLACK,border_width=LINETHICKNESS)
+        arcade.draw_text("GAME          OVER",start_x,start_y,arcade.color.RED_DEVIL,75, font_name='GARA')
+        arcade.draw_circle_outline(center_x=SCREEN_WIDTH/2,center_y= SCREEN_HEIGHT/2,radius= RADIUS*1.5,color= arcade.color.BLACK,border_width=LINETHICKNESS)
         if self.hover == True:
-            arcade.draw_circle_filled(center_x=CENTER_X1,center_y= CENTER_Y1,radius= RADIUS*1.4,color= arcade.color.MINT_GREEN)
+            arcade.draw_circle_filled(center_x=SCREEN_WIDTH/2,center_y= SCREEN_HEIGHT/2,radius= RADIUS*1.4,color= arcade.color.MINT_GREEN)
         else:
             pass
     
     def on_mouse_motion(self,x,y,dx,dy):
-        if (CENTER_X1-RADIUS-322)<x<(CENTER_X1+RADIUS-322) and (CENTER_Y1-RADIUS)<y<(CENTER_Y1+RADIUS):
+        if (SCREEN_WIDTH/2-RADIUS)<x<(SCREEN_WIDTH/2+RADIUS) and (SCREEN_HEIGHT/2-RADIUS)<y<(SCREEN_HEIGHT/2+RADIUS):
             self.hover = True
         else:
             self.hover = False
@@ -211,7 +211,7 @@ class MyGame(arcade.View):
         self.total_time = 0.0
 
         # Load sounds
-        self.CORRECT_deer_sound = arcade.load_sound("soundsGame/correctDeer.wav")       # MUST STILL APPLY THESE BELOW 
+        self.CORRECT_deer_sound = arcade.load_sound("soundsGame/correctDeer.wav") 
         self.CORRECT_sign_sound = arcade.load_sound("soundsGame/correctSign.wav")
         self.WRONG_sound = arcade.load_sound("soundsGame/wrong.wav")
         self.jump_sound = arcade.load_sound("soundsGame/jump.wav")
@@ -273,55 +273,73 @@ class MyGame(arcade.View):
 
         # Placing the locations for the DEER 
         # This shows using a coordinate list to place sprites
-        float_coords_list = [[500, 196],
-                           [800, 196],
-                           [1100, 196],
-                           [1400, 196]]
+        x_coords_list = [500, 800, 1100, 1400]
 
-        # Deer locations 
-        deer_coords_list = [[500, 96],
-                           [800, 96],
-                           [1100, 96],
-                           [1400, 96]]
-
-        # Sign locations 
-        sign_coords_list = [[500, 255],
-                           [800, 255],
-                           [1100, 255],
-                           [1400, 255]]
-
-        for coordinate in float_coords_list:
+        for x in x_coords_list:
             # Add a floating crate on location 
             wall = arcade.Sprite("imagesGame/snow.png", TILE_SCALING)
-            wall.position = coordinate
+            wall.position = [x, 196]
             self.wall_list.append(wall)
         
-        for location in deer_coords_list: 
+            # Use a loop to place the DO NOT FEED signs for our character to pick up
+            sign = arcade.Sprite("imagesGame/sign.png", SIGN_SCALING) 
+            sign.position = [x, 255] 
+
             # Add deers to positions below grounds
             deer = arcade.Sprite("imagesGame/nakedReindeer.png", DEER_SCALING)
-            deer.position = location 
-            self.correct_feed_deer_list.append(deer)        # ASSUME THEY ARE ALL CORRECT FOR NOW 
+            deer.position = [x, 96] 
 
             scarfChoice = random.randint(0, 2)
             scarf = arcade.Sprite(scarvesSource[scarfChoice], DEER_SCALING)
-            scarf.position = location 
+            scarf.position = [x, 96] 
             self.accessories_list.append(scarf)
 
             bootChoice = random.randint(0, 2) 
             boot = arcade.Sprite(bootsSource[bootChoice], DEER_SCALING)
-            boot.position = location 
+            boot.position = [x, 96] 
             self.accessories_list.append(boot)
 
             hatChoice = random.randint(0, 2)
             hat = arcade.Sprite(hatsSource[hatChoice], DEER_SCALING)
-            hat.position = location 
+            hat.position = [x, 96] 
             self.accessories_list.append(hat)
         
-        # Use a loop to place the DO NOT FEED signs for our character to pick up
-        for place in sign_coords_list:
-            sign = arcade.Sprite("imagesGame/sign.png", SIGN_SCALING) # FIX UP PROPER SCALE, IMAGE 
-            sign.position = place
-            self.wrong_dont_feed_sign_list.append(sign) # --> change list as necessary 
+            if scarfChoice == 0 and bootChoice == 1: 
+                self.correct_feed_deer_list.append(deer) 
+                self.wrong_dont_feed_sign_list.append(sign)
+            elif bootChoice == 2 and hatChoice == 2: 
+                self.wrong_feed_deer_list.append(deer) 
+                self.correct_dont_feed_sign_list.append(sign) 
+            elif hatChoice == 0 and scarfChoice == 2: 
+                self.wrong_feed_deer_list.append(deer) 
+                self.correct_dont_feed_sign_list.append(sign) 
+            elif bootChoice == 1 and hatChoice == 1: 
+                self.wrong_feed_deer_list.append(deer) 
+                self.correct_dont_feed_sign_list.append(sign) 
+            elif scarfChoice == 1 and bootChoice == 0: 
+                self.correct_feed_deer_list.append(deer) 
+                self.wrong_dont_feed_sign_list.append(sign)
+            elif scarfChoice == 2 and bootChoice == 2: 
+                self.correct_feed_deer_list.append(deer) 
+                self.wrong_dont_feed_sign_list.append(sign)
+            elif hatChoice == 1 and bootChoice == 0: 
+                self.wrong_feed_deer_list.append(deer) 
+                self.correct_dont_feed_sign_list.append(sign) 
+            elif bootChoice == 2 and hatChoice == 0: 
+                self.wrong_feed_deer_list.append(deer) 
+                self.correct_dont_feed_sign_list.append(sign) 
+            elif hatChoice == 2 and scarfChoice == 2: 
+                self.correct_feed_deer_list.append(deer) 
+                self.wrong_dont_feed_sign_list.append(sign)
+            elif bootChoice == 1: 
+                self.wrong_feed_deer_list.append(deer) 
+                self.correct_dont_feed_sign_list.append(sign) 
+            elif hatChoice == 1: 
+                self.correct_feed_deer_list.append(deer) 
+                self.wrong_dont_feed_sign_list.append(sign)
+            else: 
+                self.wrong_feed_deer_list.append(deer) 
+                self.correct_dont_feed_sign_list.append(sign) 
 
         # Create the 'physics engine'
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
@@ -335,7 +353,7 @@ class MyGame(arcade.View):
         # --- Manage Timer --- 
 
         # Calculate minutes 
-        minutesToGo = 2 - int(self.total_time) // 60        # MUST STILL ADD CONDITION OF RUNNING OUT OF TIME 
+        minutesToGo = 2 - int(self.total_time) // 60  
 
         # Calculate seconds by using a modulus (remainder)
         secondsToGo = 59 - int(self.total_time) % 60
@@ -423,7 +441,7 @@ class MyGame(arcade.View):
         # Loop through each deer to remove it --> WRONG sign 
         for Wdeer in wrong_deer_hit_list:
             Wdeer.remove_from_sprite_lists()            # Remove the deer 
-            arcade.play_sound(self.WRONG_deer_sound)            # Play a sound
+            arcade.play_sound(self.WRONG_sound)            # Play a sound
             # Add one to the STRIKES 
             self.strike += 1
 
