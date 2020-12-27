@@ -11,6 +11,15 @@ import random
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Santa's Workshop"
+CENTER_X = 625
+CENTER_Y = 390
+CENTER_X1 = CENTER_X -120 +322
+CENTER_Y1 = CENTER_Y -150
+RADIUS = 60
+LINETHICKNESS = 6
+start_x = 250
+start_y = 450 
+Menu_Title = "Santa's Workshop"
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 1
@@ -34,7 +43,137 @@ scarvesSource = ['imagesGame/scarfBlue.png', 'imagesGame/scarfPink.png', 'images
 bootsSource = ['imagesGame/bootsGreen.png', 'imagesGame/bootsRed.png', 'imagesGame/bootsYellow.png'] 
 hatsSource = ['imagesGame/hatBlack.png', 'imagesGame/hatPurple.png', 'imagesGame/hatGray.png'] 
 
-class MyGame(arcade.Window):
+
+
+class MainMenuView(arcade.View):
+    '''
+    This creates the main menu.
+    The program will begin by running this class.
+    If the play button is pressed and released while the mouse is still hovering over the button
+    the view will convert to show the game.
+    '''
+    def on_show(self):
+        self.hover = False
+        self.click = False
+        self.release = False
+        self.background = arcade.load_texture("imagesMenu/Main_Menu_Background.png")
+        self.startButton = arcade.Sprite("imagesMenu/Start_Button.png", scale = 0.25,center_x= CENTER_X,center_y =CENTER_Y)
+
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,self.background)
+        self.startButton.draw()  
+        arcade.draw_text("Welcome to\nSanta's Workshop",start_x,start_y,arcade.color.WHITE,50, font_name='GARA',align= "center", anchor_x= "center", anchor_y="center", bold= True)
+        if self.hover == True:
+            arcade.draw_circle_outline(center_x=CENTER_X,center_y= CENTER_Y,radius= RADIUS,color= arcade.color.MINT_GREEN,border_width=LINETHICKNESS)
+        else:
+            pass
+    
+    def on_mouse_motion(self,x,y,dx,dy):
+        if (CENTER_X-RADIUS)<x<(CENTER_X+RADIUS) and (CENTER_Y-RADIUS)<y<(CENTER_Y+RADIUS):
+            self.hover = True
+        else:
+            self.hover = False
+    def on_mouse_press(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.click = True
+        else:
+            self.click = False
+    def on_mouse_release(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.release = True
+        else:
+            self.release = False
+        if self.hover and self.click and self.release:
+            game_view = MyGame()
+            game_view.setup()
+            self.window.show_view(game_view)
+        else:
+            pass
+
+class GameOverStrike(arcade.View):
+    def on_show(self):
+        self.hover = False
+        self.click = False
+        self.release = False
+        self.background = arcade.load_texture("imagesMenu/Will_Ferrel_Game_over.png")
+        self.startButton = arcade.Sprite("imagesMenu/Restart_Button.png", scale = 0.35,center_x= CENTER_X1,center_y =CENTER_Y1)
+
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(322,0,SCREEN_WIDTH,SCREEN_HEIGHT,self.background)
+        self.startButton.draw()  
+        arcade.draw_text("GAME          OVER",start_x-110+322,start_y,arcade.color.RED_DEVIL,75, font_name='GARA')
+        arcade.draw_circle_outline(center_x=CENTER_X1,center_y= CENTER_Y1,radius= RADIUS*1.5,color= arcade.color.BLACK,border_width=LINETHICKNESS)
+        if self.hover == True:
+            arcade.draw_circle_filled(center_x=CENTER_X1,center_y= CENTER_Y1,radius= RADIUS*1.4,color= arcade.color.MINT_GREEN)
+        else:
+            pass
+    
+    def on_mouse_motion(self,x,y,dx,dy):
+        if (CENTER_X1-RADIUS-322)<x<(CENTER_X1+RADIUS-322) and (CENTER_Y1-RADIUS)<y<(CENTER_Y1+RADIUS):
+            self.hover = True
+        else:
+            self.hover = False
+    def on_mouse_press(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.click = True
+        else:
+            self.click = False
+    def on_mouse_release(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.release = True
+        else:
+            self.release = False
+        if self.hover and self.click and self.release:
+            game_view = MyGame()
+            game_view.setup()
+            self.window.show_view(game_view)
+        else:
+            pass
+
+class GameOverTime(arcade.View):
+    def on_show(self):
+        self.hover = False
+        self.click = False
+        self.release = False
+        self.background = arcade.load_texture("imagesMenu/Will_Ferrel_Game_over.png")
+        self.startButton = arcade.Sprite("imagesMenu/Restart_Button.png", scale = 0.35,center_x= CENTER_X1-540,center_y =CENTER_Y1)
+
+    def on_draw(self):
+        arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(-216,0,SCREEN_WIDTH,SCREEN_HEIGHT,self.background)
+        self.startButton.draw()  
+        arcade.draw_text("GAME          OVER",start_x-110-216,start_y,arcade.color.RED_DEVIL,75, font_name='GARA')
+        arcade.draw_circle_outline(center_x=CENTER_X1-540,center_y= CENTER_Y1,radius= RADIUS*1.5,color= arcade.color.BLACK,border_width=LINETHICKNESS)
+        if self.hover == True:
+            arcade.draw_circle_filled(center_x=CENTER_X1-540,center_y= CENTER_Y1,radius= RADIUS*1.4,color= arcade.color.MINT_GREEN)
+        else:
+            pass
+    
+    def on_mouse_motion(self,x,y,dx,dy):
+        if (CENTER_X1-RADIUS-324)<x<(CENTER_X1+RADIUS-324) and (CENTER_Y1-RADIUS)<y<(CENTER_Y1+RADIUS):
+            self.hover = True
+        else:
+            self.hover = False
+    def on_mouse_press(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.click = True
+        else:
+            self.click = False
+    def on_mouse_release(self,x,y,button,modifiers):
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.release = True
+        else:
+            self.release = False
+        if self.hover and self.click and self.release:
+            game_view = MyGame()
+            game_view.setup()
+            self.window.show_view(game_view)
+        else:
+            pass
+
+class MyGame(arcade.View):
     """
     Main application class.
     """
@@ -42,7 +181,7 @@ class MyGame(arcade.Window):
     def __init__(self):
 
         # Call the parent class and set up the window
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # These are 'lists' that keep track of our sprites. Each sprite should go into a list.
         self.correct_feed_deer_list = None 
@@ -204,6 +343,11 @@ class MyGame(arcade.Window):
         # Figure out our countdown 
         countdown = f"Time: {minutesToGo:02d}:{secondsToGo:02d}"
 
+        # Finds when the player runs out of time and ends the game
+        if minutesToGo<=0 and secondsToGo<=0:
+            game_view = GameOverTime()
+            self.window.show_view(game_view)
+
         #        -----
 
         # Draw our sprites
@@ -278,7 +422,7 @@ class MyGame(arcade.Window):
         
         # Loop through each deer to remove it --> WRONG sign 
         for Wdeer in wrong_deer_hit_list:
-            Cdeer.remove_from_sprite_lists()            # Remove the deer 
+            Wdeer.remove_from_sprite_lists()            # Remove the deer 
             arcade.play_sound(self.WRONG_deer_sound)            # Play a sound
             # Add one to the STRIKES 
             self.strike += 1
@@ -287,6 +431,13 @@ class MyGame(arcade.Window):
         for Cdeer in correct_deer_hit_list: 
             Cdeer.remove_from_sprite_lists()            # Remove the deer 
             arcade.play_sound(self.CORRECT_deer_sound)          # Play a sound 
+        
+        # Condition to convert view to game over screen 
+
+        if self.strike >= 3:
+            game_view = GameOverStrike()
+            self.window.show_view(game_view)
+
 
         # Update timer 
         self.total_time += delta_time
@@ -332,8 +483,9 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main method """
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH,SCREEN_HEIGHT,SCREEN_TITLE)
+    start_view = MainMenuView()
+    window.show_view(start_view)
     arcade.run()
 
 
