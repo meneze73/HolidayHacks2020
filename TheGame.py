@@ -5,28 +5,34 @@ By Minnie Menezes, Alaa Hatoum, and Robert Menezes
 Original code (before modifications and personalizations) from Platformer Game in Python Arcade Library Files 
 """
 import arcade
+import random 
 
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
-SCREEN_TITLE = "Some Coolio Game Title!"
+SCREEN_TITLE = "Santa's Workshop"
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 1
 TILE_SCALING = 0.5
-COIN_SCALING = 0.5             # COINS will actually act as points if the player picks the right response to the module (to feed or not the feed the deer!)
+DEER_SCALING = 0.7              # STILL NEED TO APPLY THESE TO LATER IN THE CODE 
+SIGN_SCALING = 0.5 
 
 # Movement speed of player, in pixels per frame
 PLAYER_MOVEMENT_SPEED = 5
 GRAVITY = 1 
 PLAYER_JUMP_SPEED = 20 
 
-# How many pixels to keep as a minimum margin between the character
-# and the edge of the screen.
+# How many pixels to keep as a minimum margin between the character and the edge of the screen.
 LEFT_VIEWPORT_MARGIN = 250
 RIGHT_VIEWPORT_MARGIN = 250
 BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
+
+# Deer Module Modifications/Possibilities 
+scarvesSource = ['imagesGame/scarfBlue.png', 'imagesGame/scarfPink.png', 'imagesGame/scarfWhite.png'] 
+bootsSource = ['imagesGame/bootsGreen.png', 'imagesGame/bootsRed.png', 'imagesGame/bootsYellow.png'] 
+hatsSource = ['imagesGame/hatBlack.png', 'imagesGame/hatPurple.png', 'imagesGame/hatGray.png'] 
 
 class MyGame(arcade.Window):
     """
@@ -38,9 +44,14 @@ class MyGame(arcade.Window):
         # Call the parent class and set up the window
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-        # These are 'lists' that keep track of our sprites. Each sprite should
-        # go into a list.
-        self.coin_list = None
+        # These are 'lists' that keep track of our sprites. Each sprite should go into a list.
+        self.correct_feed_deer_list = None 
+        self.wrong_feed_deer_list = None                # ADD A STRIKE 
+        self.correct_dont_feed_sign_list = None 
+        self.wrong_dont_feed_sign_list = None           # ADD A STRIKE 
+
+        self.accessories_list = None 
+
         self.wall_list = None
         self.player_list = None
 
@@ -54,15 +65,17 @@ class MyGame(arcade.Window):
         self.view_bottom = 0
         self.view_left = 0
 
-        # Keep track of the score
-        self.score = 0
+        # Keep track of the STRIKES 
+        self.strike = 0
 
-        # Keep track of timer 
+        # Keep track of timer --> will be ~displayed~ as countdown 
         self.total_time = 0.0
 
         # Load sounds
-        self.collect_coin_sound = arcade.load_sound("soundsGame/coinForNow.wav") 
-        self.jump_sound = arcade.load_sound("soundsGame/jump1.wav")
+        self.CORRECT_deer_sound = arcade.load_sound("soundsGame/correctDeer.wav")       # MUST STILL APPLY THESE BELOW 
+        self.CORRECT_sign_sound = arcade.load_sound("soundsGame/correctSign.wav")
+        self.WRONG_sound = arcade.load_sound("soundsGame/wrong.wav")
+        self.jump_sound = arcade.load_sound("soundsGame/jump.wav")
 
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)        # You can change the BACKGROUND COLOR HERE!! Check out the other options here: https://arcade.academy/arcade.csscolor.html#csscolor 
 
@@ -73,17 +86,22 @@ class MyGame(arcade.Window):
         self.view_bottom = 0
         self.view_left = 0
 
-        # Keep track of the score
-        self.score = 0
+        # Keep track of the STRIKE 
+        self.strike = 0
 
         # Keep track of timer 
         self.total_time = 0.0                           # ----- ...down to here 
 
-
         # Create the Sprite lists
         self.player_list = arcade.SpriteList()
-        self.wall_list = arcade.SpriteList(use_spatial_hash=True)       # ...the latest version of the code has nothing in these brackets... 
-        self.coin_list = arcade.SpriteList(use_spatial_hash=True)
+        self.wall_list = arcade.SpriteList()
+
+        self.correct_feed_deer_list = arcade.SpriteList() 
+        self.wrong_feed_deer_list = arcade.SpriteList()                # ADD A STRIKE 
+        self.correct_dont_feed_sign_list = arcade.SpriteList() 
+        self.wrong_dont_feed_sign_list = arcade.SpriteList()           # ADD A STRIKE 
+
+        self.accessories_list = arcade.SpriteList()
 
         # Set up the player, specifically placing it at these coordinates.
         image_source = "imagesGame/elf_stand.png"
@@ -94,36 +112,77 @@ class MyGame(arcade.Window):
 
         # Create the ground
         # This shows using a loop to place multiple sprites horizontally
-        for x in range(0, 1250, 64):
-            wall = arcade.Sprite("imagesGame/snowMid.png", TILE_SCALING)
-            wall.center_x = x
-            wall.center_y = 32
-            self.wall_list.append(wall)
+        for x in range(0, 2000, 64):
+            ground = arcade.Sprite("imagesGame/snowMid.png", TILE_SCALING)
+            ground.center_x = x
+            ground.center_y = 32
+            self.wall_list.append(ground)
+        
+        # This shows using a loop to play multiple sprites vertically 
+        for x in [0, 1985]: 
+            for y in range (95, 500, 64): 
+                crate = arcade.Sprite("imagesGame/crate.png", TILE_SCALING)
+                crate.center_x = x 
+                crate.center_y = y
+                self.wall_list.append(crate)
 
-        # ADD THE 'NORTH POLE' SIGN HERE 
+        # North Pole welcome sign 
+        pole = arcade.Sprite("imagesGame/northPole.png", TILE_SCALING) 
+        pole.center_x = 200
+        pole.center_y = 96
+        self.wall_list.append(pole)
 
-        # Put some crates on the ground
+        # Placing the locations for the DEER 
         # This shows using a coordinate list to place sprites
-        coordinate_list = [[512, 196],
-                           [256, 196],
-                           [768, 196]]
+        float_coords_list = [[500, 196],
+                           [800, 196],
+                           [1100, 196],
+                           [1400, 196]]
 
-        for coordinate in coordinate_list:
-            # Add a crate on the ground
+        # Deer locations 
+        deer_coords_list = [[500, 96],
+                           [800, 96],
+                           [1100, 96],
+                           [1400, 96]]
+
+        # Sign locations 
+        sign_coords_list = [[500, 255],
+                           [800, 255],
+                           [1100, 255],
+                           [1400, 255]]
+
+        for coordinate in float_coords_list:
+            # Add a floating crate on location 
             wall = arcade.Sprite("imagesGame/snow.png", TILE_SCALING)
             wall.position = coordinate
             self.wall_list.append(wall)
+        
+        for location in deer_coords_list: 
+            # Add deers to positions below grounds
+            deer = arcade.Sprite("imagesGame/nakedReindeer.png", DEER_SCALING)
+            deer.position = location 
+            self.correct_feed_deer_list.append(deer)        # ASSUME THEY ARE ALL CORRECT FOR NOW 
 
-        # MUST REPEAT "CRATE" CODE ABOVE HERE SO THAT WE HAVE PLATFORMS FOR THE PLAYER TO PICK WHETHER OR NOT TO [e.g.] FEED THE REINDEER 
+            scarfChoice = random.randint(0, 2)
+            scarf = arcade.Sprite(scarvesSource[scarfChoice], DEER_SCALING)
+            scarf.position = location 
+            self.accessories_list.append(scarf)
 
-        # PLEASE also add a wall on either ends of the ground so that no surprises happen like last time XDDD 
+            bootChoice = random.randint(0, 2) 
+            boot = arcade.Sprite(bootsSource[bootChoice], DEER_SCALING)
+            boot.position = location 
+            self.accessories_list.append(boot)
 
-        # Use a loop to place some coins for our character to pick up
-        for x in range(128, 1250, 256):
-            coin = arcade.Sprite("imagesGame/coinGoldForNow.png", COIN_SCALING)
-            coin.center_x = x
-            coin.center_y = 96
-            self.coin_list.append(coin)
+            hatChoice = random.randint(0, 2)
+            hat = arcade.Sprite(hatsSource[hatChoice], DEER_SCALING)
+            hat.position = location 
+            self.accessories_list.append(hat)
+        
+        # Use a loop to place the DO NOT FEED signs for our character to pick up
+        for place in sign_coords_list:
+            sign = arcade.Sprite("imagesGame/sign.png", SIGN_SCALING) # FIX UP PROPER SCALE, IMAGE 
+            sign.position = place
+            self.wrong_dont_feed_sign_list.append(sign) # --> change list as necessary 
 
         # Create the 'physics engine'
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, self.wall_list, GRAVITY)
@@ -137,27 +196,31 @@ class MyGame(arcade.Window):
         # --- Manage Timer --- 
 
         # Calculate minutes 
-        minutes = int(self.total_time) // 60 
+        minutesToGo = 2 - int(self.total_time) // 60        # MUST STILL ADD CONDITION OF RUNNING OUT OF TIME 
 
         # Calculate seconds by using a modulus (remainder)
-        seconds = int(self.total_time) % 60
+        secondsToGo = 59 - int(self.total_time) % 60
 
-        # Figure out our output
-        output = f"Time: {minutes:02d}:{seconds:02d}"
+        # Figure out our countdown 
+        countdown = f"Time: {minutesToGo:02d}:{secondsToGo:02d}"
 
         #        -----
 
         # Draw our sprites
         self.wall_list.draw()
-        self.coin_list.draw()
+        self.correct_feed_deer_list.draw()
+        self.wrong_feed_deer_list.draw() 
+        self.correct_dont_feed_sign_list.draw()
+        self.wrong_dont_feed_sign_list.draw()
         self.player_list.draw()
+        self.accessories_list.draw()
 
-        # Draw our score on the screen, scrolling it with the viewport
-        score_text = f"Score: {self.score}"
-        arcade.draw_text(score_text, 10 + self.view_left, 10 + self.view_bottom, arcade.csscolor.WHITE, 18)
+        # Draw our STRIKES on the screen, scrolling it with the viewport
+        strike_text = f"Strikes: {self.strike}"
+        arcade.draw_text(strike_text, 10 + self.view_left, 10 + self.view_bottom, arcade.csscolor.WHITE, 18)
 
         # Draw our timer text on the screen, scrolling it with the viewport 
-        arcade.draw_text(output, 870 + self.view_left, 10 + self.view_bottom, arcade.color.WHITE, 18)
+        arcade.draw_text(countdown, 870 + self.view_left, 10 + self.view_bottom, arcade.color.WHITE, 18)
 
 
     def on_key_press(self, key, modifiers):
@@ -190,17 +253,38 @@ class MyGame(arcade.Window):
         # Move the player with the physics engine
         self.physics_engine.update()
 
-        # See if we hit any coins
-        coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
+        # See if we hit anything... 
+        accessories_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.accessories_list) 
+        wrong_sign_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.wrong_dont_feed_sign_list)
+        correct_sign_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.correct_dont_feed_sign_list)
+        wrong_deer_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.wrong_feed_deer_list)
+        correct_deer_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.correct_feed_deer_list)
 
-        # Loop through each coin we hit (if any) and remove it
-        for coin in coin_hit_list:
-            # Remove the coin
-            coin.remove_from_sprite_lists()
-            # Play a sound
-            arcade.play_sound(self.collect_coin_sound)
-            # Add one to the score          --> MUST ADD CONDITIONING FOR RIGHT/WRONG DECISION ON MODULE AT HAND 
-            self.score += 1
+        # Loop through each accessory to remove it from play 
+        for accessory in accessories_hit_list: 
+            accessory.remove_from_sprite_lists()    # Remove accessory (no need for any extra sound or points; deer will already account for that) 
+        
+        # Loop through each sign to remove it --> WRONG sign 
+        for Wsign in wrong_sign_hit_list: 
+            Wsign.remove_from_sprite_lists() # Remove sign 
+            arcade.play_sound(self.WRONG_sound)
+        
+        # ... --> CORRECT sign 
+        for Csign in correct_sign_hit_list: 
+            Csign.remove_from_sprite_lists()
+            arcade.play_sound(self.CORRECT_sign_sound)
+        
+        # Loop through each deer to remove it --> WRONG sign 
+        for Wdeer in wrong_deer_hit_list:
+            Cdeer.remove_from_sprite_lists()            # Remove the deer 
+            arcade.play_sound(self.WRONG_deer_sound)            # Play a sound
+            # Add one to the STRIKES 
+            self.strike += 1
+
+        # ... --> CORRECT DEER 
+        for Cdeer in correct_deer_hit_list: 
+            Cdeer.remove_from_sprite_lists()            # Remove the deer 
+            arcade.play_sound(self.CORRECT_deer_sound)          # Play a sound 
 
         # Update timer 
         self.total_time += delta_time
