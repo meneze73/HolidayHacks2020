@@ -21,8 +21,8 @@ class MainMenuWindow(arcade.View):
            self.release = False
     
     def setup(self):
-        self.background = arcade.load_texture("Sprites/Main_Menu_Background.png")
-        self.startButton = arcade.Sprite("Sprites/Start_Button.png", scale = 0.25,center_x= CENTER_X,center_y =CENTER_Y)
+        self.background = arcade.load_texture("imagesMenu/Main_Menu_Background.png")
+        self.startButton = arcade.Sprite("imagesMenu/Start_Button.png", scale = 0.25,center_x= CENTER_X,center_y =CENTER_Y)
 
 
     def on_mouse_motion(self,x,y,dx,dy):
@@ -58,8 +58,8 @@ class GameOver(arcade.View):
         self.hover = False
         self.click = False
         self.release = False
-        self.background = arcade.load_texture("Sprites/Will_Ferrel_Game_over.png")
-        self.startButton = arcade.Sprite("Sprites/Restart_Button.png", scale = 0.5,center_x= CENTER_X-120,center_y =CENTER_Y-150)
+        self.background = arcade.load_texture("imagesMenu/Will_Ferrel_Game_over.png")
+        self.startButton = arcade.Sprite("imagesMenu/Restart_Button.png", scale = 0.35,center_x= CENTER_X-120,center_y =CENTER_Y-150)
 
     def on_draw(self):
         arcade.start_render()
